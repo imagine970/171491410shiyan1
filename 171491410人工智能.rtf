@@ -1,0 +1,222 @@
+{\rtf1\ansi\ansicpg936\deff0\nouicompat\deflang1033\deflangfe2052{\fonttbl{\f0\fnil\fcharset134 \'cb\'ce\'cc\'e5;}}
+{\*\generator Riched20 10.0.18362}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang2052 171491410\par
+\par
+a-start\'d1\'b0\'c2\'b7\'cb\'e3\'b7\'a8\par
+import sys\par
+\par
+#\'b5\'d8\'cd\'bc(\'b4\'d3\'ce\'c4\'bc\'fe\'d6\'d0\'bb\'f1\'c8\'a1\'b5\'c4\'b6\'fe\'ce\'ac\'ca\'fd\'d7\'e9)\par
+maze=[]\par
+#\'c6\'f0\'b5\'e3\par
+start=None\par
+#\'d6\'d5\'b5\'e3\par
+end=None\par
+#\'bf\'aa\'b7\'c5\'c1\'d0\'b1\'ed\'a3\'a8\'d2\'b2\'be\'cd\'ca\'c7\'d3\'d0\'b4\'fd\'cc\'bd\'b2\'e9\'b5\'c4\'b5\'d8\'b5\'e3\'a3\'a9\par
+open_list=\{\}\par
+#\'b9\'d8\'b1\'d5\'c1\'d0\'b1\'ed  (\'d2\'d1\'be\'ad\'cc\'bd\'b2\'e9\'b9\'fd\'b5\'c4\'b5\'d8\'b5\'e3\'ba\'cd\'b2\'bb\'bf\'c9\'d0\'d0\'d7\'df\'b5\'c4\'b5\'d8\'b5\'e3)\par
+close_list=\{\}\par
+#\'b5\'d8\'cd\'bc\'b1\'df\'bd\'e7(\'b6\'fe\'ce\'ac\'ca\'fd\'d7\'e9\'b5\'c4\'b4\'f3\'d0\'a1\'a3\'ac\'d3\'c3\'d3\'da\'c5\'d0\'b6\'cf\'d2\'bb\'b8\'f6\'bd\'da\'b5\'e3\'b5\'c4\'cf\'e0\'c1\'da\'bd\'da\'b5\'e3\'ca\'c7\'b7\'f1\'b3\'ac\'b3\'f6\'b7\'b6\'ce\'a7)\par
+map_border=()\par
+#\'b7\'bd\'cf\'f2\par
+orientation=[]\par
+\par
+class Node(object):\par
+    def __init__(self,father,x,y):\par
+        if x<0 or x>=map_border[0] or y<0 or y>=map_border[1]:\par
+            raise Exception('\'d7\'f8\'b1\'ea\'b4\'ed\'ce\'f3')\par
+\par
+        self.father=father\par
+        self.x=x\par
+        self.y=y\par
+\par
+        if father !=None:\par
+            self.G=father.G+1\par
+            self.H=distance(self,end)\par
+            self.F=self.G+self.H\par
+        else:\par
+            self.G=0\par
+            self.H=0\par
+            self.F=0\par
+\par
+    def reset_father(self,father,new_G):\par
+        if father!=None:\par
+            self.G=new_G\par
+            self.F=self.G+self.H\par
+\par
+        self.father=father\par
+\par
+#\'bc\'c6\'cb\'e3\'be\'e0\'c0\'eb\par
+def distance(cur,end):\par
+    return abs(cur.x-end.x)+abs(cur.y-end.y)\par
+        \par
+\par
+#\'d4\'daopen_list\'d6\'d0\'d5\'d2\'b5\'bd\'d7\'ee\'d0\'a1F\'d6\'b5\'b5\'c4\'bd\'da\'b5\'e3\par
+def min_F_node():\par
+    global open_list\par
+    if len(open_list)==0:\par
+        raise Exception('\'c2\'b7\'be\'b6\'b2\'bb\'b4\'e6\'d4\'da')\par
+\par
+    _min=9999999999999999\par
+    _k=(start.x,start.y)\par
+\par
+    #\'d2\'d4\'c1\'d0\'b1\'ed\'b5\'c4\'d0\'ce\'ca\'bd\'b1\'e9\'c0\'faopen_list\'d7\'d6\'b5\'e4\par
+    for k,v in open_list.items():\par
+        if _min>v.F:\par
+            _min=v.F\par
+            _k=k\par
+\par
+    return open_list[_k]\par
+\par
+#\'b0\'d1\'cf\'e0\'c1\'da\'b5\'c4\'bd\'da\'b5\'e3\'bc\'d3\'c8\'eb\'b5\'bdopen_list\'d6\'ae\'d6\'d0\'a3\'ac\'c8\'e7\'b9\'fb\'b7\'a2\'cf\'d6\'d6\'d5\'b5\'e3\'cb\'b5\'c3\'f7\'d5\'d2\'b5\'bd\'d6\'d5\'b5\'e3\par
+def addAdjacentIntoOpen(node):\par
+    global open_list,close_list\par
+    \par
+    #\'ca\'d7\'cf\'c8\'bd\'ab\'b8\'c3\'bd\'da\'b5\'e3\'b4\'d3\'bf\'aa\'b7\'c5\'c1\'d0\'b1\'ed\'d2\'c6\'b6\'af\'b5\'bd\'b9\'d8\'b1\'d5\'c1\'d0\'b1\'ed\'d6\'ae\'d6\'d0\par
+    open_list.pop((node.x,node.y))\par
+    close_list[(node.x,node.y)]=node\par
+    adjacent=[]\par
+\par
+    #\'cc\'ed\'bc\'d3\'cf\'e0\'c1\'da\'bd\'da\'b5\'e3\'b5\'c4\'ca\'b1\'ba\'f2\'d2\'aa\'d7\'a2\'d2\'e2\'b1\'df\'bd\'e7\par
+    #\'c9\'cf\par
+    try:\par
+        adjacent.append(Node(node,node.x,node.y-1))\par
+    except Exception as err:\par
+        pass\par
+    #\'cf\'c2\par
+    try:\par
+        adjacent.append(Node(node,node.x,node.y+1))\par
+    except Exception as err:\par
+        pass\par
+    #\'d7\'f3\par
+    try:\par
+        adjacent.append(Node(node,node.x-1,node.y))\par
+    except Exception as err:\par
+        pass\par
+    #\'d3\'d2\par
+    try:\par
+        adjacent.append(Node(node,node.x+1,node.y))\par
+    except Exception as err:\par
+        pass\par
+\par
+    #\'bc\'ec\'b2\'e9\'c3\'bf\'d2\'bb\'b8\'f6\'cf\'e0\'c1\'da\'b5\'c4\'b5\'e3\par
+    for a in adjacent:\par
+        #\'c8\'e7\'b9\'fb\'ca\'c7\'d6\'d5\'b5\'e3\'a3\'ac\'bd\'e1\'ca\'f8\par
+        if (a.x,a.y)==(end.x,end.y):\par
+            new_G=node.G+1\par
+            end.reset_father(node,new_G)\par
+            return True\par
+        #\'c8\'e7\'b9\'fb\'d4\'daclose_list\'d6\'d0,\'b2\'bb\'c8\'a5\'c0\'ed\'cb\'fb\par
+        if (a.x,a.y) in close_list:\par
+            continue\par
+        #\'c8\'e7\'b9\'fb\'b2\'bb\'d4\'daopen_list\'d6\'d0\'a3\'ac\'d4\'f2\'cc\'ed\'bc\'d3\'bd\'f8\'c8\'a5\par
+        if (a.x,a.y) not in open_list:\par
+            open_list[(a.x,a.y)]=a\par
+        #\'c8\'e7\'b9\'fb\'b4\'e6\'d4\'da\'d4\'daopen_list\'d6\'d0\'a3\'ac\'cd\'a8\'b9\'fdG\'d6\'b5\'c5\'d0\'b6\'cf\'d5\'e2\'b8\'f6\'b5\'e3\'ca\'c7\'b7\'f1\'b8\'fc\'bd\'fc \par
+        else:\par
+            exist_node=open_list[(a.x,a.y)]\par
+            new_G=node.G+1\par
+            if new_G<exist_node.G:\par
+                exist_node.reset_father(node,new_G)\par
+\par
+    return False\par
+\par
+#\'b2\'e9\'d5\'d2\'c2\'b7\'cf\'df\par
+def find_the_path(start,end):\par
+    global open_list\par
+    open_list[(start.x,start.y)]=start\par
+\par
+    the_node=start\par
+    try:\par
+        while not addAdjacentIntoOpen(the_node):\par
+            the_node=min_F_node()\par
+\par
+    except Exception as err:\par
+        #\'c2\'b7\'be\'b6\'d5\'d2\'b2\'bb\'b5\'bd\par
+        print(err)\par
+        return False\par
+    return True\par
+\par
+#\'b6\'c1\'c8\'a1\'ce\'c4\'bc\'fe\'a3\'ac\'bd\'ab\'ce\'c4\'bc\'fe\'d6\'d0\'b5\'c4\'d0\'c5\'cf\'a2\'bc\'d3\'d4\'d8\'b5\'bd\'b5\'d8\'cd\'bc(maze)\'d0\'c5\'cf\'a2\'d6\'d0\par
+def readfile(url):\par
+    global maze,map_border\par
+    f=open(url)\par
+    line=f.readline()\par
+    map_size=line.split()\par
+    map_size=list(map(int,map_size))\par
+    x=map_size[0]\par
+    y=map_size[1]\par
+    map_border=(x,y)\par
+    \par
+    i=0\par
+    while line:\par
+        line=f.readline()\par
+        maze.append(list(map(int,line.split())))\par
+        i=i+1\par
+        if i>x-1:\par
+            break\par
+\par
+\par
+#\'cd\'a8\'b9\'fd\'b5\'dd\'b9\'e9\'b5\'c4\'b7\'bd\'ca\'bd\'b8\'f9\'be\'dd\'c3\'bf\'b8\'f6\'b5\'e3\'b5\'c4\'b8\'b8\'bd\'da\'b5\'e3\'bd\'ab\'c2\'b7\'be\'b6\'c1\'ac\'c6\'f0\'c0\'b4\par
+def mark_path(node):\par
+    global orientation\par
+    if node.father==None:     \par
+        return\par
+    \par
+    #print('(\{x\},\{y\})'.format(x=node.x,y=node.y))\par
+    #\'bd\'ab\'b7\'bd\'cf\'f2\'d0\'c5\'cf\'a2\'b4\'e6\'b4\'a2\'b5\'bd\'b7\'bd\'cf\'f2\'c1\'d0\'b1\'ed\'d6\'d0\par
+    if node.father.x-node.x>0:\par
+        orientation.append('L')\par
+    elif node.father.x-node.x<0:\par
+        orientation.append('R')\par
+    elif node.father.y-node.y>0:\par
+        orientation.append('U')\par
+    elif node.father.y-node.y<0:\par
+        orientation.append('D')\par
+    mark_path(node.father)\par
+    \par
+#\'bd\'e2\'ce\'f6\'b5\'d8\'cd\'bc,\'b0\'d1\'b2\'bb\'bf\'c9\'d7\'df\'b5\'c4\'b5\'e3\'d6\'b1\'bd\'d3\'b7\'c5\'b5\'bdclose_list\'d6\'d0\par
+def preset_map():\par
+    global start,end,map_bloder,maze\par
+    row_index=0\par
+    for row in maze:\par
+        col_index=0\par
+        for n in row:\par
+            if n==1:\par
+                block_node=Node(None,col_index,row_index)\par
+                close_list[(block_node.x,block_node.y)]=block_node\par
+            col_index=col_index+1\par
+        row_index=row_index+1\par
+    \par
+if __name__=='__main__':\par
+    #\'c5\'d0\'b6\'cf\'d4\'da\'bf\'d8\'d6\'c6\'cc\'a8\'ca\'e4\'c8\'eb\'b5\'c4\'b2\'ce\'ca\'fd\'ca\'b1\'ba\'f2\'b4\'ef\'b5\'bd\'d2\'aa\'c7\'f3\par
+    if len(sys.argv)<6:\par
+        raise Exception('\'b2\'ce\'ca\'fd\'b8\'f1\'ca\'bd\'a3\'ba\'ce\'c4\'bc\'fe\'c3\'fb x1 y1 x2 y2   \'c6\'e4\'d6\'d0x1 y1\'b4\'fa\'b1\'ed\'bf\'aa\'ca\'bc\'d7\'f8\'b1\'ea\'a3\'acx2 y2\'b4\'fa\'b1\'ed\'c4\'bf\'b1\'ea\'d7\'f8\'b1\'ea')\par
+    else:\par
+        #\'b4\'d3\'bf\'d8\'d6\'c6\'cc\'a8\'b6\'c1\'c8\'a1\'b2\'ce\'ca\'fd\par
+        readfile(sys.argv[1])\par
+        start_x=int(sys.argv[2])\par
+        start_y=int(sys.argv[3])\par
+        end_x=int(sys.argv[4])\par
+        end_y=int(sys.argv[5])\par
+        start=Node(None,start_x,start_y)\par
+        end=Node(None,end_x,end_y)\par
+\par
+        \par
+        \par
+        preset_map()\par
+\par
+        #\'c5\'d0\'b6\'cf\'c6\'f0\'b5\'e3\'d6\'d5\'b5\'e3\'ca\'c7\'b7\'f1\'b7\'fb\'ba\'cf\'d2\'aa\'c7\'f3\par
+        if (start.x,start.y) in close_list or (end.x,end.y) in close_list:\par
+            raise Exception('\'ca\'e4\'c8\'eb\'b5\'c4\'d7\'f8\'b1\'ea\'b2\'bb\'bf\'c9\'d7\'df')\par
+\par
+        if find_the_path(start,end):\par
+            mark_path(end)\par
+\par
+        #\'c1\'d0\'b1\'ed\'b7\'bd\'cf\'f2\'b5\'f7\'d5\'fb\'ce\'aa\'c6\'f0\'b5\'e3\'bf\'aa\'ca\'bc\par
+        orientation.reverse()\par
+        str_ori=''\par
+        for o in orientation:\par
+            str_ori=str_ori+o+' '\par
+        print(str_ori)\par
+}
+ 
